@@ -15,6 +15,9 @@ class LunarLanderGame:
         self.canvas_height = 600
         self.canvas = tk.Canvas(root, width=self.canvas_width, height=self.canvas_height, bg="black")
         self.canvas.pack()
+        self.lander_img = tk.PhotoImage(file="assets/lander.png")
+        self.platform_img = tk.PhotoImage(file="assets/platform.png")
+        self.bg_img = tk.PhotoImage(file="assets/background.png")
 
         # world size in meters
         self.world_width = 100.0
@@ -158,7 +161,10 @@ class LunarLanderGame:
             self.canvas_height,
             self.thrust_on,
             self.game_over,
-            self.message
+            self.message,
+            self.lander_img,
+            self.platform_img,
+            self.bg_img
         )
 
         self.root.after(int(self.dt * 1000), self.update_game)
