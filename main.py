@@ -3,7 +3,7 @@ import random
 import tkinter as tk
 
 from lander import Lander
-
+from graphics import draw
 
 class LunarLanderGame:
     def __init__(self, root):
@@ -65,12 +65,6 @@ class LunarLanderGame:
         self.thrust_on = False
         self.move_left = False
         self.move_right = False
-
-    def world_to_screen_x(self, x):
-        return (x / self.world_width) * self.canvas_width
-
-    def world_to_screen_y(self, y):
-        return self.canvas_height - (y / self.world_height) * self.canvas_height
 
     def key_press(self, event):
         key = event.keysym.lower()
@@ -144,87 +138,6 @@ class LunarLanderGame:
             self.lander.x = self.world_width - half_width
             self.lander.vx = 0.0
 
-    def draw(self):
-        self.canvas.delete("all")
-
-        # ground
-        ground_y = self.world_to_screen_y(0)
-        self.canvas.create_rectangle(
-            0, ground_y, self.canvas_width, self.canvas_height,
-            fill="gray20", outline="gray20"
-        )
-
-        # platform
-        platform_left = self.world_to_screen_x(self.platform_x - self.platform_width / 2)
-        platform_right = self.world_to_screen_x(self.platform_x + self.platform_width / 2)
-
-        self.canvas.create_rectangle(
-            platform_left,
-            ground_y - self.platform_height_px,
-            platform_right,
-            ground_y,
-            fill="green",
-            outline="white"
-        )
-
-        # lander
-        lander_left = self.world_to_screen_x(self.lander.x - self.lander.width / 2)
-        lander_right = self.world_to_screen_x(self.lander.x + self.lander.width / 2)
-        lander_top = self.world_to_screen_y(self.lander.y + self.lander.height / 2)
-        lander_bottom = self.world_to_screen_y(self.lander.y - self.lander.height / 2)
-
-        self.canvas.create_rectangle(
-            lander_left, lander_top, lander_right, lander_bottom,
-            fill="white", outline="white"
-        )
-
-        # flame when thrusting
-        if self.thrust_on and not self.game_over:
-            center_x = self.world_to_screen_x(self.lander.x)
-            flame_top = lander_bottom
-            flame_bottom = lander_bottom + 18
-
-            self.canvas.create_polygon(
-                center_x - 8, flame_top,
-                center_x + 8, flame_top,
-                center_x, flame_bottom,
-                fill="orange",
-                outline="yellow"
-            )
-
-        # info text
-        info_text = (
-            f"x = {self.lander.x:.2f} m    "
-            f"y = {self.lander.y:.2f} m    "
-            f"vx = {self.lander.vx:.2f} m/s    "
-            f"vy = {self.lander.vy:.2f} m/s"
-        )
-
-        self.canvas.create_text(
-            10, 20,
-            text=info_text,
-            fill="white",
-            anchor="w",
-            font=("Arial", 12)
-        )
-
-        self.canvas.create_text(
-            10, 45,
-            text="Controls: Space = thrust, A/D or arrows = move, R = restart",
-            fill="white",
-            anchor="w",
-            font=("Arial", 12)
-        )
-
-        if self.game_over:
-            self.canvas.create_text(
-                self.canvas_width / 2,
-                80,
-                text=self.message,
-                fill="white",
-                font=("Arial", 18, "bold")
-            )
-
     def update_game(self):
         if self.running and not self.game_over:
             self.lander.update(self.dt, self.thrust_on, self.move_left, self.move_right)
@@ -234,7 +147,20 @@ class LunarLanderGame:
                 self.message = self.classify_landing()
                 self.game_over = True
 
-        self.draw()
+        draw(
+            self.canvas,
+            self.lander,
+            self.platform_x,
+            self.platform_width,
+            self.world_width,
+            self.world_height,
+            self.canvas_width,
+            self.canvas_height,
+            self.thrust_on,
+            self.game_over,
+            self.message
+        )
+
         self.root.after(int(self.dt * 1000), self.update_game)
 
 
